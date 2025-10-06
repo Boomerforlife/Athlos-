@@ -146,7 +146,7 @@ athlos-fitness-app/
 4. **Claim Territory**: Your running path automatically claims territory
 5. **Compete**: Check leaderboards and compete with friends
 
-## 🔧 API Endpoints (summary)
+## API Endpoints (summary)
 
 ### Auth
 - POST `/api/users/register` — register
