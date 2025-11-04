@@ -1,4 +1,8 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+// Hardcoded API base URL to ensure it always points to the correct backend
+const API_BASE_URL = 'http://localhost:8081/api';
+
+// Log the API base URL for debugging
+console.log('API Base URL:', API_BASE_URL);
 
 export interface User {
   id: number;
@@ -50,6 +54,7 @@ class ApiService {
         ...(localStorage.getItem('athlos_token') ? { 'Authorization': `Bearer ${localStorage.getItem('athlos_token')}` } : {}),
         ...options.headers,
       },
+      credentials: 'include' as RequestCredentials, // Include credentials for CORS
       ...options,
     };
 
@@ -97,8 +102,13 @@ class ApiService {
       body: JSON.stringify({ email, password }),
     });
     localStorage.setItem('athlos_token', res.token);
-    localStorage.setItem('athlos_user', JSON.stringify(res.user));
-    return res.user;
+    // Ensure user has a default dailyStepGoal
+    const userWithGoal = {
+      ...res.user,
+      dailyStepGoal: res.user.dailyStepGoal || 0, // Default to 0 if not set
+    };
+    localStorage.setItem('athlos_user', JSON.stringify(userWithGoal));
+    return userWithGoal;
   }
 
   logout(): void {
@@ -116,10 +126,20 @@ class ApiService {
   }
 
   async updateUser(id: number, userData: Partial<User>): Promise<User> {
-    return this.request<User>(`/users/${id}`, {
+    const updatedUser = await this.request<User>(`/users/${id}`, {
       method: 'PUT',
       body: JSON.stringify(userData),
     });
+    
+    // Update the user in localStorage if it's the current user
+    const currentUser = JSON.parse(localStorage.getItem('athlos_user') || 'null');
+    if (currentUser && currentUser.id === id) {
+      const mergedUser = { ...currentUser, ...userData, ...updatedUser };
+      localStorage.setItem('athlos_user', JSON.stringify(mergedUser));
+      return mergedUser;
+    }
+    
+    return updatedUser;
   }
 
   async updateLocation(id: number, latitude: number, longitude: number): Promise<void> {

@@ -23,8 +23,28 @@ const App: React.FC = () => {
   };
 
   const handleUserLogin = (userData: User) => {
+    console.log('User logged in:', userData);
     setUser(userData);
+<<<<<<< Updated upstream
     setScreen('home');
+=======
+    
+    // Always redirect to goals page after signup to ensure goal is set
+    console.log('Redirecting to goals page');
+    setScreen('goalsetting');
+    
+    // The following code is kept for reference but commented out
+    /*
+    // Check if user has set a daily step goal
+    if (!userData.dailyStepGoal || userData.dailyStepGoal === 0) {
+      console.log('No goal set, redirecting to goals page');
+      setScreen('goalsetting');
+    } else {
+      console.log('Goal already set, redirecting to home');
+      setScreen('home');
+    }
+    */
+>>>>>>> Stashed changes
   };
 
   const handleUserLogout = () => {
@@ -33,6 +53,7 @@ const App: React.FC = () => {
     setScreen('welcome');
   };
 
+<<<<<<< Updated upstream
   const handleGuestLogin = () => {
     const guestUser: User = {
       id: 0,
@@ -45,6 +66,26 @@ const App: React.FC = () => {
     localStorage.setItem('athlos_is_guest', 'true');
     setUser(guestUser);
     setScreen('home');
+=======
+  const handleUserUpdate = (updatedUser: User) => {
+    console.log('=== UPDATING USER DATA ===');
+    console.log('Previous user data:', user);
+    console.log('New user data:', updatedUser);
+    
+    // Ensure we have the latest data by merging with existing user data
+    const mergedUser = { ...user, ...updatedUser };
+    
+    // Update the state
+    setUser(mergedUser);
+    
+    // Update localStorage
+    localStorage.setItem('athlos_user', JSON.stringify(mergedUser));
+    console.log('User data updated in state and localStorage');
+    
+    // Force a re-render of the home screen by toggling the screen
+    setScreen('home');
+    setTimeout(() => setScreen('home'), 100);
+>>>>>>> Stashed changes
   };
 
   // Check for existing user session on app load

@@ -42,6 +42,51 @@ const GoalSettingScreen: React.FC<GoalSettingScreenProps> = ({ onNavigate, onNex
     }
   }, [goals]);
 
+  const handleSaveGoal = async () => {
+    if (!user?.id) {
+      console.error('No user ID found');
+      onNavigate('home');
+      return;
+    }
+    
+    console.log('=== SAVING GOAL ===');
+    console.log('Current user ID:', user.id);
+    console.log('New goal value:', goal);
+    
+    setIsLoading(true);
+    try {
+      // First update the user with the new goal
+      console.log('Updating user with new goal...');
+      const updatedUser = await apiService.updateUser(user.id, {
+        ...user,  // Include all existing user data
+        dailyStepGoal: goal
+      });
+      
+      console.log('User updated successfully:', updatedUser);
+      
+      // Update the user context and local storage
+      if (onUserUpdate) {
+        console.log('Calling onUserUpdate with:', updatedUser);
+        onUserUpdate(updatedUser);
+      } else {
+        console.warn('onUserUpdate is not defined');
+      }
+      
+      // Force a small delay to ensure state updates are processed
+      setTimeout(() => {
+        console.log('Navigating to home screen...');
+        onNavigate('home');
+      }, 200);
+      
+    } catch (error) {
+      console.error('Error saving goal:', error);
+      // Still navigate to home even if there's an error
+      onNavigate('home');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleScroll = () => {
     if (scrollContainerRef.current) {
       if (scrollTimeoutRef.current) {
@@ -151,6 +196,7 @@ const GoalSettingScreen: React.FC<GoalSettingScreenProps> = ({ onNavigate, onNex
         <footer className="px-8 pb-8 pt-4">
           <button
             type="button"
+<<<<<<< Updated upstream
             onClick={() => {
               if (onNext) {
                 onNext();
@@ -159,6 +205,11 @@ const GoalSettingScreen: React.FC<GoalSettingScreenProps> = ({ onNavigate, onNex
               }
             }}
             className="w-full max-w-xs mx-auto block py-4 bg-red-600 rounded-lg font-semibold text-lg hover:bg-red-700 transition-colors"
+=======
+            onClick={handleSaveGoal}
+            disabled={isLoading}
+            className="w-full max-w-xs mx-auto block py-4 bg-red-600 rounded-lg font-semibold text-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+>>>>>>> Stashed changes
           >
             Finish Setup
           </button>

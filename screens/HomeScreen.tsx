@@ -63,6 +63,47 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, user }) => {
   const [goalSteps, setGoalSteps] = useState(user?.dailyStepGoal || 6000);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Initialize and update goalSteps when user prop changes
+  useEffect(() => {
+    console.log('=== HOMESCREEN USER EFFECT ===');
+    console.log('Current user:', user);
+    
+    if (user?.dailyStepGoal !== undefined) {
+      console.log('User prop updated - dailyStepGoal:', user.dailyStepGoal, 'Current goalSteps:', goalSteps);
+      
+      // Always update goalSteps from user prop to ensure it's in sync
+      setGoalSteps(user.dailyStepGoal);
+      
+      // Also update current steps if needed
+      const loadSteps = async () => {
+        if (user.id) {
+          try {
+            console.log('Loading user runs to calculate current steps...');
+            const userRuns = await apiService.getUserRuns(user.id);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayRuns = userRuns.filter(run => {
+              if (!run.startTime) return false;
+              const runDate = new Date(run.startTime);
+              runDate.setHours(0, 0, 0, 0);
+              return runDate.getTime() === today.getTime();
+            });
+            const totalStepsToday = todayRuns.reduce((sum, run) => sum + (run.totalSteps || 0), 0);
+            console.log('Total steps today:', totalStepsToday);
+            setCurrentSteps(totalStepsToday);
+          } catch (error) {
+            console.error('Error loading user runs:', error);
+          }
+        }
+      };
+      
+      loadSteps();
+    } else {
+      console.log('No dailyStepGoal in user object, using default 6000');
+      setGoalSteps(6000);
+    }
+  }, [user, user?.id, user?.dailyStepGoal]);
+
   const progress = Math.min((currentSteps / goalSteps) * 100, 100);
 
   const filteredFriends = useMemo(() => {

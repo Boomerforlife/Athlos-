@@ -19,8 +19,9 @@ services:
     build: ./backend
     container_name: athlos-backend
     ports:
-      - "8080:8080"
+      - "8081:8080"
     environment:
+      SERVER_PORT: 8080
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/athlos_db
       SPRING_DATASOURCE_USERNAME: athlos_user
       SPRING_DATASOURCE_PASSWORD: athlos_password
@@ -37,8 +38,10 @@ services:
     ports:
       - "3000:3000"
     environment:
-      REACT_APP_API_URL: http://localhost:8080/api
-      REACT_APP_WS_URL: ws://localhost:8080/ws
+      - REACT_APP_API_URL=http://localhost:8081/api
+      - REACT_APP_WS_URL=ws://localhost:8081/ws
+      - VITE_API_URL=http://localhost:8081/api
+      - VITE_WS_URL=ws://localhost:8081/ws
     depends_on:
       - backend
     networks:
